@@ -1,7 +1,9 @@
 import debounce from '../utils/debounce';
 import { getSearchEndpoint } from '../lib/api/endPoints';
 // import { trackSearch } from './Analytics';
-import { fetchResults, renderResults, shouldSearch, displayError, clearResultsDOM } from './Functions';
+import {
+  fetchResults, renderResults, shouldSearch, displayError, clearResultsDOM,
+} from './Functions';
 
 const createSearch = (config) => {
   const {
@@ -17,10 +19,51 @@ const createSearch = (config) => {
   let lastQuery = '';
   let isFetching = false;
 
-  const init = () => {
-    cacheDOM();
-    setupEventListeners();
-    return { destroy: cleanup };
+  const abortCurrentRequest = () => {
+    if (currentController) {
+      currentController.abort();
+      currentController = null;
+    }
+  };
+
+  const clearResults = () => {
+    clearResultsDOM(resultsContainer);
+    lastQuery = '';
+  };
+
+  const handleError = (error) => {
+    if (error.name === 'AbortError') return;
+    displayError(resultsContainer, 'Failed to load results. Please try again later.');
+  };
+
+  const handleInput = async (event) => {
+    const query = event.target.value.trim();
+    if (!shouldSearch(query, minQueryLength, lastQuery, isFetching)) return;
+
+    lastQuery = query;
+    // trackSearch(query);
+
+    try {
+      isFetching = true;
+      abortCurrentRequest();
+      currentController = new AbortController();
+      const endpoint = getSearchEndpoint(query);
+      const results = await fetchResults(query, currentController.signal, endpoint);
+      renderResults(results, resultsContainer);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      isFetching = false;
+      currentController = null;
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      searchInput.value = '';
+      clearResults();
+      abortCurrentRequest();
+    }
   };
 
   const cacheDOM = () => {
@@ -37,42 +80,6 @@ const createSearch = (config) => {
     window.addEventListener('beforeunload', abortCurrentRequest);
   };
 
-  const handleInput = async (event) => {
-    const query = event.target.value.trim();
-    if (!shouldSearch(query, minQueryLength, lastQuery, isFetching)) return;
-    
-    lastQuery = query;
-    // trackSearch(query);
-    
-    try {
-        isFetching = true;
-        abortCurrentRequest();
-        currentController = new AbortController();
-        const endpoint = getSearchEndpoint(query);
-        const results = await fetchResults(query, currentController.signal, endpoint);
-        renderResults(results, resultsContainer);
-      } catch (error) {
-        handleError(error);
-      } finally {
-        isFetching = false;
-        currentController = null;
-    }
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === 'Escape') {
-      searchInput.value = '';
-      clearResults();
-      abortCurrentRequest();
-    }
-  };
-
-  const handleError = (error) => {
-    if (error.name === 'AbortError') return;
-    console.error('Search error:', error);
-    displayError(resultsContainer, 'Failed to load results. Please try again later.');
-  };
-
   const cleanup = () => {
     searchInput.removeEventListener('input', handleInput);
     searchInput.removeEventListener('keydown', handleKeyDown);
@@ -80,16 +87,10 @@ const createSearch = (config) => {
     abortCurrentRequest();
   };
 
-  const abortCurrentRequest = () => {
-    if (currentController) {
-      currentController.abort();
-      currentController = null;
-    }
-  };
-
-  const clearResults = () => {
-    clearResultsDOM(resultsContainer);
-    lastQuery = '';
+  const init = () => {
+    cacheDOM();
+    setupEventListeners();
+    return { destroy: cleanup };
   };
 
   return { init, performSearch: (query) => handleInput({ target: { value: query } }) };
