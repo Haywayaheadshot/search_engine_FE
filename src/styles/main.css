@@ -43,7 +43,7 @@ body {
 
 #search-input:focus {
   outline: none;
-  border-color: #0066cc;
+  border-color: #06c;
 }
 
 .results-list {
@@ -66,9 +66,9 @@ body {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(0,0,0,.3);
+  border: 3px solid rgba(0, 0, 0, 0.3);
   border-radius: 50%;
-  border-top-color: #0066cc;
+  border-top-color: #06c;
   animation: spin 1s ease-in-out infinite;
 }
 
