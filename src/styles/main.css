@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'Poppins', sans-serif !important;
+  src:
+    url('./font/my-font.woff2') format('woff2'),
+    url('./font/my-font.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+}
+
+body {
+  background-color: #fbbd5e;
+}
