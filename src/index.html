@@ -7,16 +7,40 @@
     <title>Search Engine</title>
 </head>
 <body>
-    <header class="nav">
-
+    <header class="header" role="banner">
+        <h1>Article Search</h1>
     </header>
-    <main>
-        <section>
-            <h1>Help Juice Search Engine</h1>
+    
+    <main role="main">
+        <section id="search-container" aria-labelledby="search-heading">
+            <h2 id="search-heading" class="visually-hidden">Search Articles</h2>
+            
+            <form id="search-form" role="search" novalidate>
+                <div class="search-group">
+                    <label for="search-input" class="visually-hidden">Search articles</label>
+                    <input 
+                        id="search-input" 
+                        type="search" 
+                        name="q"
+                        placeholder="Search articles..."
+                        aria-label="Search articles"
+                    >
+                    <button type="submit" class="visually-hidden">Search</button>
+                </div>
+                
+                <div id="search-status" aria-live="polite" class="status-message"></div>
+            </form>
+        </section>
+
+        <section id="results-container" aria-labelledby="results-heading">
+            <h2 id="results-heading">Search Results</h2>
+            <div id="loading-indicator" class="loading" hidden></div>
+            <ul id="results-list" class="results-list"></ul>
         </section>
     </main>
-    <footer class="footer">
 
+    <footer class="footer" role="contentinfo">
+        <p>&copy; Real Time Search Engine</p>
     </footer>
 </body>
 </html>
