@@ -1,16 +1,28 @@
 import debounce from '../utils/debounce';
-import { getSearchEndpoint } from '../lib/api/endPoints';
+import { postQueryEndpoint } from '../lib/api/endPoints';
+import { getUserIp } from '../services/ipService';
 // import { trackSearch } from './Analytics';
 import {
-  fetchResults, renderResults, shouldSearch, displayError, clearResultsDOM,
+  postQuery,
+  renderResults,
+  shouldSearch,
+  displayError,
+  clearResultsDOM,
+  endsWithFillerWord,
 } from './Functions';
+
+let userIp = null;
+
+(async function initializeIp() {
+  userIp = await getUserIp();
+})();
 
 const createSearch = (config) => {
   const {
     inputSelector = '#search-input',
     resultsSelector = '#results-list',
     minQueryLength = 3,
-    debounceTime = 300,
+    debounceTime = 5000,
   } = config;
 
   let searchInput;
@@ -39,16 +51,24 @@ const createSearch = (config) => {
   const handleInput = async (event) => {
     const query = event.target.value.trim();
     if (!shouldSearch(query, minQueryLength, lastQuery, isFetching)) return;
+    if (endsWithFillerWord(query)) {
+      return;
+    }
 
     lastQuery = query;
     // trackSearch(query);
+    if (!userIp) {
+      userIp = await getUserIp();
+    }
 
     try {
       isFetching = true;
       abortCurrentRequest();
       currentController = new AbortController();
-      const endpoint = getSearchEndpoint(query);
-      const results = await fetchResults(query, currentController.signal, endpoint);
+
+      const endpoint = postQueryEndpoint(query, userIp);
+      const results = await postQuery(query, currentController.signal, endpoint);
+
       renderResults(results, resultsContainer);
     } catch (error) {
       handleError(error);
@@ -93,7 +113,10 @@ const createSearch = (config) => {
     return { destroy: cleanup };
   };
 
-  return { init, performSearch: (query) => handleInput({ target: { value: query } }) };
+  return {
+    init,
+    performSearch: (query) => handleInput({ target: { value: query } }),
+  };
 };
 
 export default createSearch;

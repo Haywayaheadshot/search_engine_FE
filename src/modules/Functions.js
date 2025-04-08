@@ -4,18 +4,6 @@ export const formatDate = (dateString) => new Date(dateString).toLocaleDateStrin
   day: 'numeric',
 });
 
-export const fetchResults = async (query, signal, apiEndpoint) => {
-  const response = await fetch(apiEndpoint, {
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-  });
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  return response.json();
-};
-
 export const renderResults = (results, container) => {
   if (!results?.length) {
     container.innerHTML = '<li class="no-results">No articles found</li>';
@@ -30,6 +18,56 @@ export const renderResults = (results, container) => {
   `).join('');
 };
 
+
+export const fillerWords = [
+  'a', 'the', 'and', 'or', 'but',
+  'is', 'to', 'in', 'of', 'for',
+  'on', 'at', 'by', 'with', 'from',
+  'as', 'if', 'then', 'how', 'why',
+  'what', 'when'
+];
+
+
+export const endsWithFillerWord = (query) => {
+  if (!query) return false;
+  const words = query.trim().toLowerCase().split(/\s+/);
+  const lastWord = words[words.length - 1];
+  return fillerWords.includes(lastWord);
+};
+
+export const postQuery = async (query, signal, apiEndpoint) => {
+  const response = await fetch(apiEndpoint, {
+    method: 'POST',
+    signal,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const getAnalytics = async (signal, analyticsEndpoint) => {
+  const response = await fetch(analyticsEndpoint, {
+    method: 'GET',
+    signal,
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export const shouldSearch = (
   query, minLength, lastQuery, isFetching,
 ) => query.length >= minLength && query !== lastQuery && !isFetching;
@@ -41,3 +79,4 @@ export const displayError = (container, message) => {
 export const clearResultsDOM = (container) => {
   container.innerHTML = '';
 };
+

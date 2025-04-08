@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "jest",
-    "start": "webpack serve --open",
+    "start": "webpack serve --open --port 5000",
     "build": "webpack"
   },
   "repository": {
