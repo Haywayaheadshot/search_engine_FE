@@ -1,13 +1,8 @@
 import debounce from '../utils/debounce';
 import { postQueryEndpoint } from '../lib/api/endPoints';
 import { getUserIp } from '../services/ipService';
-// import { trackSearch } from './Analytics';
 import {
-  postQuery,
-  renderResults,
   shouldSearch,
-  displayError,
-  clearResultsDOM,
   endsWithFillerWord,
 } from './Functions';
 
@@ -19,17 +14,19 @@ let userIp = null;
 
 const createSearch = (config) => {
   const {
-    inputSelector = '#search-input',
-    resultsSelector = '#results-list',
-    minQueryLength = 3,
-    debounceTime = 5000,
+    inputSelector,
+    analyticsSelector,
+    minQueryLength,
+    debounceTime,
+    onSearchSuccess = () => {},
   } = config;
 
   let searchInput;
-  let resultsContainer;
+  let analyticsContainer;
   let currentController = null;
   let lastQuery = '';
-  let isFetching = false;
+  let isSearching = false;
+  let loadingIndicator;
 
   const abortCurrentRequest = () => {
     if (currentController) {
@@ -38,42 +35,80 @@ const createSearch = (config) => {
     }
   };
 
-  const clearResults = () => {
-    clearResultsDOM(resultsContainer);
-    lastQuery = '';
+  const postQuery = async (signal, apiEndpoint) => {
+    const response = await fetch(apiEndpoint, {
+      method: 'POST',
+      signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  
+    return response.json();
   };
 
-  const handleError = (error) => {
-    if (error.name === 'AbortError') return;
-    displayError(resultsContainer, 'Failed to load results. Please try again later.');
-  };
+  const showNotification = (type, message) => {
+  const notificationContainer = document.getElementById('notifications');
+  const successContainer = document.querySelector('.success-notification');
+  const errorContainer = document.querySelector('.error-notification');
+
+  if (type === 'success') {
+    successContainer.innerText = message;
+    successContainer.style.display = 'block';
+    errorContainer.style.display = 'none';
+  } else {
+    errorContainer.innerText = message;
+    errorContainer.style.display = 'block';
+    successContainer.style.display = 'none';
+  }
+
+  notificationContainer.style.display = 'flex';
+
+  setTimeout(() => {
+    notificationContainer.style.display = 'none';
+    successContainer.innerText = '';
+    errorContainer.innerText = '';
+  }, 5000);
+};
+
 
   const handleInput = async (event) => {
     const query = event.target.value.trim();
-    if (!shouldSearch(query, minQueryLength, lastQuery, isFetching)) return;
-    if (endsWithFillerWord(query)) {
-      return;
-    }
-
+    if (!shouldSearch(query, minQueryLength, lastQuery, isSearching)) return;
+    if (endsWithFillerWord(query)) return;
+  
     lastQuery = query;
-    // trackSearch(query);
     if (!userIp) {
       userIp = await getUserIp();
     }
-
+  
     try {
-      isFetching = true;
+      isSearching = true;
+      loadingIndicator.style.display = 'block';
       abortCurrentRequest();
       currentController = new AbortController();
-
+  
       const endpoint = postQueryEndpoint(query, userIp);
-      const results = await postQuery(query, currentController.signal, endpoint);
-
-      renderResults(results, resultsContainer);
+      const results = await postQuery(currentController.signal, endpoint);
+  
+      if (results.status === 200) {
+        const msg = results.message || 'Search recorded successfully.';
+        showNotification("success", msg)
+        searchInput.value = '';
+        lastQuery = '';  
+        onSearchSuccess();
+      }
     } catch (error) {
-      handleError(error);
+      const msg = error.message || 'Something went wrong. Please try again.';
+      showNotification("error", msg)
     } finally {
-      isFetching = false;
+      isSearching = false;
+      loadingIndicator.style.display = 'none';
       currentController = null;
     }
   };
@@ -81,15 +116,16 @@ const createSearch = (config) => {
   const handleKeyDown = (event) => {
     if (event.key === 'Escape') {
       searchInput.value = '';
-      clearResults();
       abortCurrentRequest();
     }
   };
 
   const cacheDOM = () => {
     searchInput = document.querySelector(inputSelector);
-    resultsContainer = document.querySelector(resultsSelector);
-    if (!searchInput || !resultsContainer) {
+    analyticsContainer = document.querySelector(analyticsSelector);
+    loadingIndicator = document.getElementById('loading-indicator');
+  
+    if (!searchInput || !analyticsContainer || !loadingIndicator) {
       throw new Error('Required search elements not found');
     }
   };

@@ -27,10 +27,17 @@ body {
   border: 0;
 }
 
+.search-form {
+  position: fixed;
+  top: 0px;
+}
+
 .search-group {
   display: flex;
   max-width: 600px;
   margin: 20px auto;
+  align-items: center;
+  gap: 10px;
 }
 
 #search-input {
@@ -61,9 +68,8 @@ body {
   background-color: #f8f8f8;
 }
 
-/* Loading Indicator */
 .loading {
-  display: inline-block;
+  display: none;
   width: 20px;
   height: 20px;
   border: 3px solid rgba(0, 0, 0, 0.3);
@@ -80,4 +86,134 @@ body {
   text-align: center;
   color: #666;
   min-height: 24px;
+}
+
+.analytics-data-list {
+  min-height: 50vh;
+  max-height: 80vh;
+  overflow-y: scroll;
+}
+
+.query-list-data {
+  min-height: 10vh;
+  max-height: 20vh;
+  overflow-y: scroll;
+}
+
+.analytics-record {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.analytics-data-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analytics-tables {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.analytics-tables > div {
+  flex: 1 1 45%;
+  min-width: 300px;
+}
+
+@media (max-width: 768px) {
+  .analytics-tables {
+    flex-direction: column;
+  }
+
+  .analytics-tables > div {
+    width: 100%;
+  }
+}
+
+#load-more-btn {
+  margin-top: 1rem;
+  padding: 8px 12px;
+  background: #06c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+#load-more-btn:hover {
+  background: #005c99;
+}
+
+#load-more-btn:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+}
+
+.analytics-table-wrapper {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.analytics-table thead th,
+.analytics-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.analytics-table thead,
+.analytics-table tbody {
+  display: block;
+}
+
+.analytics-table thead {
+  background: #f4f4f4;
+}
+
+.scrollable-body {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.success-notification {
+  background-color: #e6ffed;
+  color: #027a48;
+  border-color: #12b76a;
+}
+
+.error-notification {
+  background-color: #ffeaea;
+  color: #c10000;
+  border-color: #e53935;
+}
+
+.success-notification, .error-notification {
+  padding: 5px 10px;
+  border: 2px solid black;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.notifications {
+  display: none;
+}
+
+.analytics-section {
+  max-height: 40vh;
+  overflow-y: scroll;
 }
