@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:3000/api/v1';
+const API_BASE = 'https://searchenginebe-production.up.railway.app/api/v1';
+
 const SEARCH_ENDPOINT = `${API_BASE}/search`;
 const ANALYTICS_ENDPOINT = `${API_BASE}/analytics`;
 
