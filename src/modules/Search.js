@@ -21,6 +21,7 @@ const createSearch = (config) => {
   let isSearching = false;
   let loadingIndicator;
   let searchSessionId = null;
+  let debouncedHandleInput;
 
   const abortCurrentRequest = () => {
     if (currentController) {
@@ -129,6 +130,7 @@ const createSearch = (config) => {
     }
 
     try {
+      if (isSearching) return;
       isSearching = true;
       loadingIndicator.style.display = 'block';
       abortCurrentRequest();
@@ -159,7 +161,7 @@ const createSearch = (config) => {
     }
   };
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = async (event) => {
     if (event.key === 'Escape') {
       searchInput.value = '';
       abortCurrentRequest();
@@ -168,6 +170,8 @@ const createSearch = (config) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       const query = searchInput.value.trim();
+
+      debouncedHandleInput.cancel();
 
       if (query && !endsWithFillerWord(query) && query !== lastQuery) {
         if (query.startsWith(lastQuery)) {
@@ -186,7 +190,8 @@ const createSearch = (config) => {
             });
           return;
         }
-        postQueryLogic(query);
+        await postQueryLogic(query);
+        lastQuery = query;
       }
     }
   };
@@ -202,7 +207,8 @@ const createSearch = (config) => {
   };
 
   const setupEventListeners = () => {
-    searchInput.addEventListener('input', debounce(handleInput, debounceTime));
+    debouncedHandleInput = debounce(handleInput, debounceTime);
+    searchInput.addEventListener('input', debouncedHandleInput);
     searchInput.addEventListener('keydown', handleKeyDown);
     window.addEventListener('beforeunload', abortCurrentRequest);
   };
