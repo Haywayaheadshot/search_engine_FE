@@ -1,5 +1,5 @@
 import { getAnalyticsEndpoint } from '../lib/api/endPoints';
-import { getUserIp } from '../services/ipService';
+import getUserIp from '../services/ipService';
 
 const getAnalytics = async (endpoint) => {
   const response = await fetch(endpoint, {
@@ -16,15 +16,13 @@ const getAnalytics = async (endpoint) => {
   return response.json();
 };
 
-const renderQuerySlice = (queries, start, end) => {
-  return queries.slice(start, end).map((record) => `
+const renderQuerySlice = (queries, start, end) => queries.slice(start, end).map((record) => `
     <li class="analytics-record">
       <p><strong>Query:</strong> ${record.query}</p>
       <p><strong>IP:</strong> ${record.ip}</p>
       <p><strong>Date:</strong> ${record.date}</p>
     </li>
   `).join('');
-};
 
 const renderAnalytics = (analytics, container) => {
   if (!analytics) {
@@ -94,13 +92,16 @@ const renderAnalytics = (analytics, container) => {
         <h3>Query Log</h3>
         <ul id="query-list" class="query-list-data"></ul>
       </section>
-      <button id="load-more-btn">Load More</button>
+
+      <section class="load-more-section">
+        <button id="load-more-btn">Load More</button>
+      </section>
     </div>
   `;
 
   const queryListEl = document.getElementById('query-list');
   const loadMoreBtn = document.getElementById('load-more-btn');
-  
+
   let visibleCount = 0;
   const increment = 10;
   const total = analytics.queries.length;
@@ -108,23 +109,22 @@ const renderAnalytics = (analytics, container) => {
   if (total <= increment) {
     loadMoreBtn.style.display = 'none';
   } else {
-    loadMoreBtn.style.display = 'inline-block'; 
+    loadMoreBtn.style.display = 'inline-block';
   }
-  
+
   const loadNextBatch = () => {
     const next = visibleCount + increment;
     const newHtml = renderQuerySlice(analytics.queries, visibleCount, next);
     queryListEl.insertAdjacentHTML('beforeend', newHtml);
     visibleCount = next;
-  
+
     if (visibleCount >= total) {
       loadMoreBtn.style.display = 'none';
     }
   };
-  
+
   loadMoreBtn.addEventListener('click', loadNextBatch);
   loadNextBatch();
-  
 };
 
 export default function createAnalytics({ analyticsSelector, buttonSelector }) {
@@ -138,7 +138,6 @@ export default function createAnalytics({ analyticsSelector, buttonSelector }) {
       const data = await getAnalytics(url);
       renderAnalytics(data, container);
     } catch (error) {
-      console.error('Analytics fetch failed:', error);
       container.innerHTML = '<li class="error">Failed to load analytics.</li>';
     }
   };

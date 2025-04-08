@@ -4,7 +4,7 @@ export const endsWithFillerWord = (query) => {
     'is', 'to', 'in', 'of', 'for',
     'on', 'at', 'by', 'with', 'from',
     'as', 'if', 'then', 'how', 'why',
-    'what', 'when'
+    'what', 'when',
   ];
 
   if (!query) return false;
@@ -13,7 +13,11 @@ export const endsWithFillerWord = (query) => {
   return fillerWords.includes(lastWord);
 };
 
-export const shouldSearch = (
-  query, minLength, lastQuery, isSearching,
-) => query.length >= minLength && query !== lastQuery && !isSearching;
-
+export const shouldSearch = (query, minQueryLength, lastQuery, isSearching) => {
+  if (query.length < minQueryLength) return false;
+  if (isSearching) return false;
+  if (lastQuery && query.startsWith(lastQuery) && query.length > lastQuery.length) {
+    return false;
+  }
+  return true;
+};

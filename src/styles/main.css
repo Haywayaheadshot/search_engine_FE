@@ -29,7 +29,7 @@ body {
 
 .search-form {
   position: fixed;
-  top: 0px;
+  top: 0;
 }
 
 .search-group {
@@ -202,7 +202,8 @@ body {
   border-color: #e53935;
 }
 
-.success-notification, .error-notification {
+.success-notification,
+.error-notification {
   padding: 5px 10px;
   border: 2px solid black;
   border-radius: 4px;
