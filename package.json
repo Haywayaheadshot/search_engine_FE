@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest",
     "start": "webpack serve --open --port 5000",
-    "build": "webpack"
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
