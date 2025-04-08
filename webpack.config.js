@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production', // Change this to 'production' for optimized builds
   entry: './src/index.js',
   devServer: {
     static: './dist',
@@ -13,7 +13,7 @@ module.exports = {
     }),
   ],
   output: {
-    filename: '[name].js',
+    filename: '[name].[contenthash].js', // Use contenthash for cache busting
     path: path.resolve(__dirname, 'dist'),
     clean: true,
   },
