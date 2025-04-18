@@ -3,10 +3,10 @@
   command = "npm run build"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api/*"
+  to = "https://searchenginebe-production.up.railway.app/api/:splat"
   status = 200
-
+  force = true
 
 [dev]
   command = "webpack serve --open"

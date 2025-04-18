@@ -1,4 +1,4 @@
-const API_BASE = 'https://searchenginebe-production.up.railway.app/api/v1';
+const API_BASE = '/api';
 
 const SEARCH_ENDPOINT = `${API_BASE}/search`;
 const ANALYTICS_ENDPOINT = `${API_BASE}/analytics`;
