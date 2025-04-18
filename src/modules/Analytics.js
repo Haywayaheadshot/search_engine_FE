@@ -5,6 +5,7 @@ const getAnalytics = async (endpoint) => {
   const response = await fetch(endpoint, {
     method: 'GET',
     headers: {
+      'Content-Type': 'application/json',
       Accept: 'application/json',
     },
   });
