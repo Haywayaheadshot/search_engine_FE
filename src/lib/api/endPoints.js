@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = '/api/v1';
 
 const SEARCH_ENDPOINT = `${API_BASE}/search`;
 const ANALYTICS_ENDPOINT = `${API_BASE}/analytics`;
